@@ -1,0 +1,107 @@
+n = 14;
+Pmin = [-21.7,-94.2,-47.8,-7.6,-11.2,-29.5,-9.,-3.5,-6.1,-13.5,-14.9,0.,0.,0.]'; 
+Pmax = [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,20.,50.,10.]'; 
+Pren = [0.,0.,0.,14.9,9.,10.,18.5,2.,7.,5.,5.,0.,0.,0.]';
+
+Pl = [Pmin + Pren];
+Pu = [Pmax + Pren];
+
+
+a = [4.,1.,2.,10.,8.,4.,9.,15.,18.,7.,6.,7.,2.,8.]';
+b = [130.,120.,135.,125.,140.,145.,150.,135.,140.,125.,120.,25.,10.,20.]';
+A = diag([a]);
+
+coneq = ones(n,1);
+
+[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = quadprog(A,b,[],[],coneq',0,Pl,Pu);
+
+
+fprintf('Schedule: \n')
+disp(X)
+fprintf('Price: %.2f \n',LAMBDA.eqlin)
+fprintf('Revenue: \n')
+disp(X*LAMBDA.eqlin)
+
+%% With external agent
+n = 14;
+Pmin = [-21.7,-94.2,-47.8,-7.6,-11.2,-29.5,-9.,-3.5,-6.1,-13.5,-14.9,0.,0.,0.]'; 
+Pmax = [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,20.,50.,10.]'; 
+Pren = [0.,0.,0.,14.9,9.,10.,18.5,2.,7.,5.,5.,0.,0.,0.]';
+
+Pl = [Pmin + Pren; 0; 0];
+Pu = [Pmax + Pren; inf; inf];
+
+
+a = [4.,1.,2.,10.,8.,4.,9.,15.,18.,7.,6.,7.,2.,8.]';
+b = [130.,120.,135.,125.,140.,145.,150.,135.,140.,125.,120.,25.,10.,20.,70.,-40.]';
+A = diag([a;0;0]);
+
+coneq = ones(n+2,1);
+coneq(end) = -1;
+
+[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = quadprog(A,b,[],[],coneq',0,Pl,Pu);
+
+fprintf('Schedule: \n')
+disp(X)
+fprintf('Price: %.2f \n',LAMBDA.eqlin)
+fprintf('Revenue: \n')
+disp(X*LAMBDA.eqlin)
+
+
+%% community-based with external agent
+n = 14;
+Pmin = [-21.7,-94.2,-47.8,-7.6,-11.2,-29.5,-9.,-3.5,-6.1,-13.5,-14.9,0.,0.,0.]'; 
+Pmax = [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,20.,50.,10.]'; 
+Pren = [0.,0.,0.,14.9,9.,10.,18.5,2.,7.,5.,5.,0.,0.,0.]';
+
+Pl = [Pmin + Pren; 0; 0; -inf(n,1); zeros(2*n,1)];
+Pu = [Pmax + Pren; inf; inf; inf(3*n,1)];
+
+
+a = [4.,1.,2.,10.,8.,4.,9.,15.,18.,7.,6.,7.,2.,8.]';
+b = [130.,120.,135.,125.,140.,145.,150.,135.,140.,125.,120.,25.,10.,20.,70.,-40., zeros(1,3*n)]';
+A = diag([a;0;0;zeros(3*n,1)]);
+
+coneq1 = zeros(1,4*n+2);
+coneq1(n+3:2*n+2) = 1;
+coneq2 = zeros(1,4*n+2);
+coneq2(2*n+3:3*n+2) = 1;
+coneq2(15) = -1;
+coneq3 = zeros(1,4*n+2);
+coneq3(3*n+3:4*n+2) = 1;
+coneq3(16) = -1;
+
+Aeq = [coneq1;coneq2;coneq3]; 
+beq = [0,0,0]';
+
+for i=1:n
+   row = zeros(1,4*n+2);
+   row(i) = 1;
+   row(i+n+2) = 1;
+   row(i+2*n+2) = 1;
+   row(i+3*n+2) = -1;
+   Aeq = [Aeq; row];
+   beq = [beq; 0];
+end
+%%
+[X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = quadprog(A,b,[],[],Aeq,beq,Pl,Pu);
+
+fprintf('Schedule: \n')
+disp(X(1:n))
+fprintf('Trading: \n')
+disp(X(n+3:2*n+2))
+fprintf('Import: \n')
+disp(X(2*n+3:3*n+2))
+fprintf('Export: \n')
+disp(X(3*n+3:4*n+2))
+fprintf('Import: %.2f \n',X(n+1))
+fprintf('Export: %.2f \n',X(n+2))
+fprintf('Price: %.2f \n',LAMBDA.eqlin(1))
+fprintf('Revenue: \n')
+disp(X(1:n)*LAMBDA.eqlin(1))
+
+
+%% Pool-based ADMM
+
+[x,z] = ADMM_pool(Pl,zeros(2,1),0,A,b,Pl,Pu,0.1); 
+disp(x)
