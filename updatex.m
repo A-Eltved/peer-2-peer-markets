@@ -4,4 +4,6 @@ function x = updatex(z,y,A,b,Pl,Pu,rho)
 H = A + rho*ones(size(A));
 h = b + (y + rho*(z(1) - z(2)))*ones(size(b));
 
-x = quadprog(H,h,[],[],[],[],Pl,Pu);
+options = optimoptions('quadprog','Display','off');
+
+x = quadprog(H,h,[],[],[],[],Pl,Pu,[],options);
