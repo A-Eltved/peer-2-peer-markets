@@ -55,7 +55,7 @@ Pmax = [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,20.,50.,10.]';
 Pren = [0.,0.,0.,14.9,9.,10.,18.5,2.,7.,5.,5.,0.,0.,0.]';
 
 Pl = [Pmin + Pren; 0; 0; -inf(n,1); zeros(2*n,1)];
-Pu = [Pmax + Pren; inf; inf; inf(n,1); inf(n-3,1); zeros(3,1); inf(n,1)]; % alpha_12-14 <= 0
+Pu = [Pmax + Pren; inf; inf; inf(n-3,1); zeros(3,1); inf(2*n,1)]; 
 
 
 a = [4.,1.,2.,10.,8.,4.,9.,15.,18.,7.,6.,7.,2.,8.]';
@@ -92,13 +92,13 @@ end
 %%
 [X,FVAL,EXITFLAG,OUTPUT,LAMBDA] = quadprog(A,b,[],[],Aeq,beq,Pl,Pu);
 
-fprintf('Schedule (p): \n')
+fprintf('Schedule: \n')
 disp(X(1:n))
-fprintf('Trading (q): \n')
+fprintf('Trading: \n')
 disp(X(n+3:2*n+2))
-fprintf('Import (alpha): \n')
+fprintf('Import: \n')
 disp(X(2*n+3:3*n+2))
-fprintf('Export (beta): \n')
+fprintf('Export: \n')
 disp(X(3*n+3:4*n+2))
 fprintf('Import: %.2f \n',X(n+1))
 fprintf('Export: %.2f \n',X(n+2))
