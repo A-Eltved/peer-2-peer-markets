@@ -129,3 +129,36 @@ disp('Import and export: ')
 disp(z)
 disp('Price: ')
 disp(y)
+
+%% Community-based ADMM
+n = 14;
+Pmin = [-21.7,-94.2,-47.8,-7.6,-11.2,-29.5,-9.,-3.5,-6.1,-13.5,-14.9,0.,0.,0.]'; 
+Pmax = [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,20.,50.,10.]'; 
+Pren = [0.,0.,0.,14.9,9.,10.,18.5,2.,7.,5.,5.,0.,0.,0.]';
+
+Pl = [Pmin + Pren];
+Pu = [Pmax + Pren];
+
+
+a = [4.,1.,2.,10.,8.,4.,9.,15.,18.,7.,6.,7.,2.,8.]';
+b = [130.,120.,135.,125.,140.,145.,150.,135.,140.,125.,120.,25.,10.,20.]';
+A = diag([a]);
+
+x_start = [Pl; zeros(n*3,1)];
+z_start = zeros(2,1);
+y_start = zeros(3,1);
+
+rho = 1;
+[x, z, y] = ADMM_com(x_start, z_start, y_start, A, b, Pl, Pu, rho, n); % ADMM_com(x,z,y,A,b,Pl,Pu,rho, n), start values for x, z and y
+
+disp('Schedule: ')
+disp(x(1:n))
+
+disp('Trading (q): ')
+disp(x(n+1:n*2))
+
+disp('Import and export: ')
+disp(z)
+
+disp('Price: ')
+disp(y)
