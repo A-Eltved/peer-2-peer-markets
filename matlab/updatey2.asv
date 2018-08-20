@@ -1,0 +1,8 @@
+function y = updatey2(x,z,y,rho)
+% Function for updating y in community-based ADMM
+C = [zeros()];
+D = [0, 0; -1, 0; 0, -1];
+
+
+y = y + rho*(C*x + D*z);
+end
